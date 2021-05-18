@@ -1,10 +1,14 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 
 import 'package:formvalidation/src/models/producto_model.dart';
 import 'package:formvalidation/src/providers/productos_provider.dart';
 import 'package:formvalidation/src/utils/utils.dart' as utils;
 
 class ProdcutoPage extends StatefulWidget {
+
   @override
   _ProdcutoPageState createState() => _ProdcutoPageState();
 }
@@ -12,23 +16,34 @@ class ProdcutoPage extends StatefulWidget {
 class _ProdcutoPageState extends State<ProdcutoPage> {
 
   final formKey = GlobalKey<FormState>();
+  final scaffoldKey = GlobalKey<ScaffoldState>();
   final productoProvider = new ProductosProvider();
   
   ProductoModel producto = new ProductoModel();
+  bool _guardando = false;
+  File foto;
 
   @override
   Widget build(BuildContext context) {
+
+    final ProductoModel prodData = ModalRoute.of(context).settings.arguments;
+    if ( prodData != null ) {
+      producto = prodData;
+    }
     return Scaffold(
+      key: scaffoldKey,
       appBar: AppBar(
         title: Text('Producto'),
         actions: <Widget>[
           IconButton(
-            icon: Icon(Icons.photo_size_select_actual),
-            onPressed: () {},
+            icon: Icon( Icons.photo_size_select_actual ),
+            onPressed: () => {},
+            // onPressed: _seleccionarFoto,
           ),
           IconButton(
-            icon: Icon(Icons.camera_alt),
-            onPressed: () {},
+            icon: Icon( Icons.camera_alt ),
+            onPressed: () => {},
+            // onPressed: _tomarFoto,
           ),
         ],
       ),
@@ -39,10 +54,11 @@ class _ProdcutoPageState extends State<ProdcutoPage> {
                 key: formKey,
                 child: Column(
                   children: <Widget>[
-                    _crearNombre(),
-                    _crearPrecio(),
-                    _crearDisponible(),
-                    _crearBoton(),
+                _mostrarFoto(),
+                _crearNombre(),
+                _crearPrecio(),
+                _crearDisponible(),
+                _crearBoton()
                   ],
                 ))),
       ),
@@ -110,16 +126,97 @@ class _ProdcutoPageState extends State<ProdcutoPage> {
         );
   }
 
-  void _submit() {
+  void _submit() async {
 
-    if (!formKey.currentState.validate()) return;
+    
+
+    if ( !formKey.currentState.validate() ) return;
 
     formKey.currentState.save();
 
-    print( producto.titulo );
-    print( producto.valor );
-    print( producto.disponible );
+    setState(() {_guardando = true; });
 
-    productoProvider.crearProducto(producto);
+    if ( foto != null ) {
+      producto.fotoUrl = await productoProvider.subirImagen(foto);
+    }
+
+
+
+    if ( producto.id == null ) {
+      productoProvider.crearProducto(producto);
+    } else {
+      productoProvider.editarProducto(producto);
+    }
+
+
+    // setState(() {_guardando = false; });
+    mostrarSnackbar('Registro guardado');
+
+    Navigator.pop(context);
+
   }
+
+void mostrarSnackbar(String mensaje){
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(mensaje),
+        duration: Duration(milliseconds: 1500),
+ 
+      )
+    );
+
+  }
+
+    Widget _mostrarFoto() {
+
+    if ( producto.fotoUrl != null ) {
+      
+      return FadeInImage(
+        image: NetworkImage( producto.fotoUrl ),
+        placeholder: AssetImage('assets/jar-loading.gif'),
+        height: 300.0,
+        fit: BoxFit.contain,
+      );
+
+    } else {
+
+      return Image(
+
+        image: AssetImage( foto?.path ?? 'assets/no-image.png'),
+        height: 300.0,
+        fit: BoxFit.cover,
+
+      );
+
+    }
+
+  }
+
+  //   _seleccionarFoto() async {
+
+  //   _procesarImagen( ImageSource.gallery );
+
+  // }
+  
+  
+  // _tomarFoto() async {
+
+  //   _procesarImagen( ImageSource.camera );
+
+  // }
+
+  // _procesarImagen( ImageSource origen ) async {
+
+  //   foto = await ImagePicker.pickImage(
+  //     source: origen
+  //   );
+
+  //   if ( foto != null ) {
+  //     producto.fotoUrl = null;
+  //   }
+
+  //   setState(() {});
+
+  // }
+
 }
