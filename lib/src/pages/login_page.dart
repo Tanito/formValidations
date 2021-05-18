@@ -115,7 +115,7 @@ class LoginPage extends StatelessWidget {
             shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(5.0)),
             elevation: 0.0,
-            color: Colors.deepPurple,
+            color: Colors.greenAccent,
             textColor: Colors.white,
             onPressed: snapshot.hasData ? () => _login(bloc, context) : null);
       },
