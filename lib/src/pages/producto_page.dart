@@ -37,13 +37,11 @@ class _ProdcutoPageState extends State<ProdcutoPage> {
         actions: <Widget>[
           IconButton(
             icon: Icon( Icons.photo_size_select_actual ),
-            onPressed: () => {},
-            // onPressed: _seleccionarFoto,
+            onPressed: _seleccionarFoto,
           ),
           IconButton(
             icon: Icon( Icons.camera_alt ),
-            onPressed: () => {},
-            // onPressed: _tomarFoto,
+            onPressed: _tomarFoto,
           ),
         ],
       ),
@@ -192,31 +190,35 @@ void mostrarSnackbar(String mensaje){
 
   }
 
-  //   _seleccionarFoto() async {
+    _seleccionarFoto() async {
 
-  //   _procesarImagen( ImageSource.gallery );
+    _procesarImagen( ImageSource.gallery );
 
-  // }
+  }
   
   
-  // _tomarFoto() async {
+  _tomarFoto() async {
 
-  //   _procesarImagen( ImageSource.camera );
+    _procesarImagen( ImageSource.camera );
 
-  // }
+  }
 
-  // _procesarImagen( ImageSource origen ) async {
+  _procesarImagen( ImageSource origen ) async {
 
-  //   foto = await ImagePicker.pickImage(
-  //     source: origen
-  //   );
+    final _picker = ImagePicker();
+ 
+    final pickedFile = await _picker.getImage(
+      source: origen,
+    );
+    
+    foto = File(pickedFile.path);
+ 
+    if (foto != null) {
+      producto.fotoUrl = null;
+    }
+ 
+    setState(() {});
 
-  //   if ( foto != null ) {
-  //     producto.fotoUrl = null;
-  //   }
-
-  //   setState(() {});
-
-  // }
+  }
 
 }
